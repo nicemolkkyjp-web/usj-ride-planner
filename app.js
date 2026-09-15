@@ -255,6 +255,14 @@ function renderLogAttractionOptions() {
   select.innerHTML = ATTRACTIONS.map((a) => `<option value="${a.id}">${a.name}</option>`).join("");
 }
 
+// ---------- 混雑度の色分け ----------
+
+function waitSeverityClass(minutes) {
+  if (minutes <= 20) return "wait-short";
+  if (minutes <= 50) return "wait-medium";
+  return "wait-long";
+}
+
 // ---------- 画面描画: 結果 ----------
 
 function renderResult({ schedule, leftover, breaksSkipped }, dayType, feltCrowd) {
@@ -304,7 +312,7 @@ function renderResult({ schedule, leftover, breaksSkipped }, dayType, feltCrowd)
         <td>${order++}</td>
         <td>${s.name}<br><small class="note">${s.area}(移動約${s.walk}分)</small></td>
         <td>${minutesToTime(s.arrival)}</td>
-        <td>${s.wait}分</td>
+        <td><span class="wait-pill ${waitSeverityClass(s.wait)}">${s.wait}分</span></td>
         <td>${minutesToTime(s.rideEnd)}</td>
         <td>${tip}</td>
       </tr>`);
@@ -353,7 +361,7 @@ function renderForecastCharts(attractionIds, dayType, feltCrowd) {
         .map((w, i) => {
           const heightPct = Math.max(6, Math.round((w / maxWait) * 100));
           return `<div class="bar-wrap" title="${hours[i]}時: 約${w}分">
-              <div class="bar" style="height:${heightPct}%"></div>
+              <div class="bar ${waitSeverityClass(w)}" style="height:${heightPct}%"></div>
               <span class="bar-label">${hours[i]}</span>
             </div>`;
         })
