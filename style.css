@@ -201,6 +201,12 @@ select {
   font-size: 0.9rem;
 }
 
+.summary-warn {
+  background: rgba(179, 64, 28, 0.1);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
 .plan-table {
   width: 100%;
   border-collapse: collapse;

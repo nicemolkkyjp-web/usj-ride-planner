@@ -77,23 +77,39 @@ function travelMinutes(areaA, areaB) {
 
 // ---------- スケジューリング(貪欲法) ----------
 
-function buildSchedule({ selectedIds, entryTime, exitTime, dayType, feltCrowd, lunchBreak }) {
+// 「空いている時間まで待つ」ためにずらしてよい時間の上限(分)。
+// これを超える無目的な空き時間は作らない。
+const MAX_DELAY_MINUTES = 90;
+
+function buildScheduleCore({
+  selectedIds,
+  entryTime,
+  exitTime,
+  dayType,
+  feltCrowd,
+  lunchBreak,
+  dinnerBreak,
+  allowDelay,
+}) {
   let currentMinutes = timeToMinutes(entryTime);
   const exitMinutes = timeToMinutes(exitTime);
   let currentArea = 0; // メインエントランス(ハリウッド・エリア)からスタート
   let remaining = [...selectedIds];
   const schedule = [];
   let lunchTaken = !lunchBreak;
+  let dinnerTaken = !dinnerBreak;
 
   while (remaining.length > 0 && currentMinutes < exitMinutes) {
     if (!lunchTaken && currentMinutes >= timeToMinutes("12:00")) {
-      schedule.push({
-        type: "lunch",
-        start: currentMinutes,
-        end: currentMinutes + 45,
-      });
+      schedule.push({ type: "lunch", start: currentMinutes, end: currentMinutes + 45 });
       currentMinutes += 45;
       lunchTaken = true;
+      continue;
+    }
+    if (!dinnerTaken && currentMinutes >= timeToMinutes("18:00")) {
+      schedule.push({ type: "dinner", start: currentMinutes, end: currentMinutes + 45 });
+      currentMinutes += 45;
+      dinnerTaken = true;
       continue;
     }
 
@@ -112,11 +128,12 @@ function buildSchedule({ selectedIds, entryTime, exitTime, dayType, feltCrowd, l
 
     if (best.arrival >= exitMinutes) break;
 
-    // 最後の1つになったアトラクションは、閉園までの間で最も空いていそうな
-    // タイミングまで待ってから乗る方が得な場合、あえて時間をずらす
-    if (remaining.length === 1) {
+    // 最後の1つになったアトラクションは、少し待てば明らかに空くタイミングが
+    // あるなら乗る時刻をずらす。ただし目的なく長時間空けないよう上限を設ける。
+    if (allowDelay && remaining.length === 1) {
+      const delayLimit = Math.min(exitMinutes, currentMinutes + MAX_DELAY_MINUTES);
       let bestDelayed = null;
-      for (let t = best.arrival; t <= exitMinutes; t += 15) {
+      for (let t = best.arrival; t <= delayLimit; t += 15) {
         const w = predictedWait(best.id, t / 60, dayType, feltCrowd);
         if (t + w + best.attraction.duration > exitMinutes) continue;
         if (!bestDelayed || w < bestDelayed.wait) {
@@ -155,6 +172,28 @@ function buildSchedule({ selectedIds, entryTime, exitTime, dayType, feltCrowd, l
   }
 
   return { schedule, leftover: remaining };
+}
+
+function buildSchedule(params) {
+  const withComfort = buildScheduleCore({ ...params, allowDelay: true });
+  if (withComfort.leftover.length === 0) {
+    return { ...withComfort, breaksSkipped: false };
+  }
+
+  // 時間に余裕がなく全部は回れない場合、休憩や時間調整を省いて
+  // できるだけ全アトラクションに乗れることを優先する
+  const wantedBreaks = params.lunchBreak || params.dinnerBreak;
+  const noComfort = buildScheduleCore({
+    ...params,
+    lunchBreak: false,
+    dinnerBreak: false,
+    allowDelay: false,
+  });
+
+  if (noComfort.leftover.length < withComfort.leftover.length) {
+    return { ...noComfort, breaksSkipped: wantedBreaks };
+  }
+  return { ...withComfort, breaksSkipped: false };
 }
 
 // ---------- 実績記録(localStorage) ----------
@@ -218,7 +257,7 @@ function renderLogAttractionOptions() {
 
 // ---------- 画面描画: 結果 ----------
 
-function renderResult({ schedule, leftover }, dayType, feltCrowd) {
+function renderResult({ schedule, leftover, breaksSkipped }, dayType, feltCrowd) {
   const resultSection = document.getElementById("result-section");
   resultSection.hidden = false;
 
@@ -228,6 +267,11 @@ function renderResult({ schedule, leftover }, dayType, feltCrowd) {
   document.getElementById("summary").innerHTML = `
     <div class="summary-item"><strong>${rideEvents.length}</strong> 件のアトラクションを予定</div>
     <div class="summary-item">合計予想待ち時間 <strong>${totalWait}分</strong></div>
+    ${
+      breaksSkipped
+        ? `<div class="summary-item summary-warn">時間に余裕がないため、休憩を省略して全て乗れるプランにしています</div>`
+        : ""
+    }
   `;
 
   const rows = [];
@@ -237,6 +281,13 @@ function renderResult({ schedule, leftover }, dayType, feltCrowd) {
       rows.push(`
         <tr class="lunch-row">
           <td colspan="6">昼休憩 (${minutesToTime(s.start)} 〜 ${minutesToTime(s.end)})</td>
+        </tr>`);
+      return;
+    }
+    if (s.type === "dinner") {
+      rows.push(`
+        <tr class="lunch-row">
+          <td colspan="6">夕食休憩 (${minutesToTime(s.start)} 〜 ${minutesToTime(s.end)})</td>
         </tr>`);
       return;
     }
@@ -372,8 +423,17 @@ function init() {
     const dayType = document.getElementById("day-type").value;
     const feltCrowd = document.getElementById("felt-crowd").value;
     const lunchBreak = document.getElementById("lunch-break").checked;
+    const dinnerBreak = document.getElementById("dinner-break").checked;
 
-    const result = buildSchedule({ selectedIds, entryTime, exitTime, dayType, feltCrowd, lunchBreak });
+    const result = buildSchedule({
+      selectedIds,
+      entryTime,
+      exitTime,
+      dayType,
+      feltCrowd,
+      lunchBreak,
+      dinnerBreak,
+    });
     renderResult(result, dayType, feltCrowd);
     document.getElementById("result-section").scrollIntoView({ behavior: "smooth" });
   });
