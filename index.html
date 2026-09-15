@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>USJまわり方プランナー</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="app-header">
+    <span class="eyebrow">USJ 攻略プランナー</span>
+    <h1>まわり方プランナー</h1>
+    <p class="subtitle">入園時刻と乗りたいアトラクションを入力すると、時間帯別の混雑予測をもとに周る順番を提案します</p>
+  </header>
+
+  <main>
+    <section class="card" id="form-section">
+      <h2>1. 予定を入力</h2>
+      <form id="plan-form">
+        <div class="form-grid">
+          <label>
+            来園日
+            <input type="date" id="visit-date" required />
+          </label>
+          <label>
+            混雑区分
+            <select id="day-type">
+              <option value="weekday">平日</option>
+              <option value="weekend">土日</option>
+              <option value="holiday">祝日</option>
+              <option value="peak">繁忙期(夏休み・GW・年末年始など)</option>
+              <option value="event">イベント開催期(ハロウィン・クリスマスなど)</option>
+            </select>
+          </label>
+          <label>
+            入園予定時刻
+            <input type="time" id="entry-time" value="09:00" required />
+          </label>
+          <label>
+            退園予定時刻
+            <input type="time" id="exit-time" value="21:00" required />
+          </label>
+          <label>
+            体感混雑度(前日・前週などを踏まえて)
+            <select id="felt-crowd">
+              <option value="-0.2">空いている見込み</option>
+              <option value="-0.1">やや空いている見込み</option>
+              <option value="0" selected>通常</option>
+              <option value="0.1">やや混雑する見込み</option>
+              <option value="0.25">非常に混雑する見込み</option>
+            </select>
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="lunch-break" checked />
+            昼休憩を入れる(12時台に45分)
+          </label>
+          <label class="checkbox-label">
+            <input type="checkbox" id="dinner-break" checked />
+            夕食休憩を入れる(18時台に45分)
+          </label>
+        </div>
+
+        <h3>乗りたいアトラクション</h3>
+        <div id="attraction-list" class="attraction-list"></div>
+
+        <button type="submit" class="primary-btn">プランを作成</button>
+      </form>
+    </section>
+
+    <section class="card" id="result-section" hidden>
+      <h2>2. 提案プラン</h2>
+      <div id="summary" class="summary"></div>
+      <table class="plan-table">
+        <thead>
+          <tr>
+            <th>順番</th>
+            <th>アトラクション</th>
+            <th>到着目安</th>
+            <th>予想待ち時間</th>
+            <th>乗車後</th>
+            <th>メモ</th>
+          </tr>
+        </thead>
+        <tbody id="plan-body"></tbody>
+      </table>
+      <div id="leftover" class="leftover" hidden></div>
+
+      <h3>時間帯別の混雑予測</h3>
+      <p class="hint">選択したアトラクションごとの、時間帯別の予想待ち時間です。バーが低いほど空いている目安です。</p>
+      <div id="forecast-charts"></div>
+    </section>
+
+    <section class="card" id="log-section">
+      <h2>3. 実際の待ち時間を記録(次回以降の予測精度が上がります)</h2>
+      <p class="hint">来園後、実際に体験した待ち時間を記録しておくと、同じアトラクションの次回予測に反映されます。記録はこの端末のブラウザ内だけに保存されます。</p>
+      <form id="log-form" class="form-grid">
+        <label>
+          アトラクション
+          <select id="log-attraction"></select>
+        </label>
+        <label>
+          時刻
+          <input type="time" id="log-time" required />
+        </label>
+        <label>
+          実際の待ち時間(分)
+          <input type="number" id="log-wait" min="0" step="5" required />
+        </label>
+        <button type="submit" class="secondary-btn">記録する</button>
+      </form>
+      <table class="plan-table" id="log-table" hidden>
+        <thead>
+          <tr>
+            <th>日付</th>
+            <th>アトラクション</th>
+            <th>時刻</th>
+            <th>実際の待ち時間</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="log-body"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    <p>※ 表示される待ち時間は過去の傾向をもとにした目安の予測です。実際の混雑状況は当日の天候・イベント・アトラクションの稼働状況等により変動します。</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
