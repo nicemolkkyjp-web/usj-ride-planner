@@ -9,6 +9,7 @@
   --accent: #1c7f8c;
   --accent-strong: #145f69;
   --accent-contrast: #ffffff;
+  --accent-soft: #e1f0ee;
   --wait-short: #3e8f6b;
   --wait-medium: #c07a1e;
   --wait-long: #b8402f;
@@ -30,6 +31,7 @@
     --accent: #52bcca;
     --accent-strong: #79d0da;
     --accent-contrast: #12232a;
+    --accent-soft: #1d3335;
     --wait-short: #6fd3a4;
     --wait-medium: #f0b04c;
     --wait-long: #ec8271;
@@ -50,6 +52,7 @@
   --accent: #52bcca;
   --accent-strong: #79d0da;
   --accent-contrast: #12232a;
+  --accent-soft: #1d3335;
   --wait-short: #6fd3a4;
   --wait-medium: #f0b04c;
   --wait-long: #ec8271;
@@ -100,15 +103,16 @@ h1, h2, h3, h4 {
   font-weight: 700;
   letter-spacing: 0.12em;
   color: var(--accent-strong);
-  background: var(--wait-short-bg);
+  background: var(--accent-soft);
   border-radius: 999px;
   padding: 4px 12px;
   margin-bottom: 10px;
 }
 
 .app-header h1 {
-  font-size: 1.65rem;
-  letter-spacing: 0.01em;
+  font-size: 1.9rem;
+  letter-spacing: 0;
+  line-height: 1.2;
 }
 
 .subtitle {
@@ -190,6 +194,13 @@ select {
   border: 1px solid var(--border);
   background: var(--surface-sunken);
   color: var(--text);
+}
+
+input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 17px;
+  height: 17px;
+  flex: 0 0 auto;
 }
 
 input:focus-visible, select:focus-visible, button:focus-visible, .link-btn:focus-visible {
@@ -298,58 +309,142 @@ input:focus-visible, select:focus-visible, button:focus-visible, .link-btn:focus
   color: var(--wait-long);
 }
 
-/* ---------- プランテーブル(タイムライン風) ---------- */
+/* ---------- 提案プラン(タイムライン表示) ---------- */
 
-.plan-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  overflow-x: auto;
-  display: block;
-  margin: 14px 0;
+.itinerary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
 }
 
-.plan-table thead,
-.plan-table tbody {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
+.itinerary-item {
+  display: flex;
+  gap: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-sunken);
 }
 
-.plan-table th {
-  text-align: left;
-  font-size: 0.72rem;
-  color: var(--muted);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 0 8px 8px;
-  border-bottom: 1px solid var(--border);
-}
-
-.plan-table td {
-  padding: 10px 8px;
-  border-bottom: 1px solid var(--border);
-  font-size: 0.86rem;
-  vertical-align: top;
-}
-
-.plan-table tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.plan-table td:first-child {
+.itinerary-time {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 3.4em;
   font-family: "M PLUS Rounded 1c", sans-serif;
-  color: var(--accent-strong);
   font-variant-numeric: tabular-nums;
-  width: 2.2em;
+  font-size: 0.8rem;
+  color: var(--accent-strong);
+  text-align: center;
+  padding-top: 2px;
 }
 
-.lunch-row td {
+.itinerary-time-arrow {
+  color: var(--muted);
+  font-size: 0.68rem;
+}
+
+.itinerary-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.itinerary-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.itinerary-order {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.itinerary-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 700;
+  font-size: 0.92rem;
+  overflow-wrap: break-word;
+}
+
+.itinerary-meta {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.itinerary-tip {
+  margin-top: 4px;
+  color: var(--accent-strong);
+  font-size: 0.78rem;
+}
+
+.itinerary-break {
   text-align: center;
   color: var(--muted);
-  font-style: italic;
+  font-size: 0.84rem;
+  padding: 10px;
   background: var(--surface-sunken);
-  border-radius: 8px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+}
+
+.itinerary-break-time {
+  margin-left: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 実績記録リスト ---------- */
+
+.log-list {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.log-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-sunken);
+}
+
+.log-row-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.log-row-name {
+  font-weight: 600;
+  font-size: 0.86rem;
+  overflow-wrap: break-word;
+}
+
+.log-row-meta {
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .wait-pill {
@@ -444,8 +539,13 @@ footer {
 }
 
 @media (max-width: 480px) {
-  .plan-table th, .plan-table td {
-    font-size: 0.8rem;
-    padding: 8px 6px;
+  .itinerary-item {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .itinerary-time {
+    min-width: 2.9em;
+    font-size: 0.74rem;
   }
 }

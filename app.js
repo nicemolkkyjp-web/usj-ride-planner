@@ -282,42 +282,44 @@ function renderResult({ schedule, leftover, breaksSkipped }, dayType, feltCrowd)
     }
   `;
 
-  const rows = [];
+  const items = [];
   let order = 1;
   schedule.forEach((s) => {
     if (s.type === "lunch") {
-      rows.push(`
-        <tr class="lunch-row">
-          <td colspan="6">昼休憩 (${minutesToTime(s.start)} 〜 ${minutesToTime(s.end)})</td>
-        </tr>`);
+      items.push(`
+        <div class="itinerary-break">🍴 昼休憩 <span class="itinerary-break-time">${minutesToTime(s.start)} 〜 ${minutesToTime(s.end)}</span></div>`);
       return;
     }
     if (s.type === "dinner") {
-      rows.push(`
-        <tr class="lunch-row">
-          <td colspan="6">夕食休憩 (${minutesToTime(s.start)} 〜 ${minutesToTime(s.end)})</td>
-        </tr>`);
+      items.push(`
+        <div class="itinerary-break">🍴 夕食休憩 <span class="itinerary-break-time">${minutesToTime(s.start)} 〜 ${minutesToTime(s.end)}</span></div>`);
       return;
     }
     if (s.type === "free") {
-      rows.push(`
-        <tr class="lunch-row">
-          <td colspan="6">自由時間 (${minutesToTime(s.start)} 〜 ${minutesToTime(s.end)}): ${s.reason}</td>
-        </tr>`);
+      items.push(`
+        <div class="itinerary-break">🚶 自由時間 <span class="itinerary-break-time">${minutesToTime(s.start)} 〜 ${minutesToTime(s.end)}</span><br><small class="note">${s.reason}</small></div>`);
       return;
     }
     const tip = buildTip(s.id, s.arrival, dayType, feltCrowd);
-    rows.push(`
-      <tr>
-        <td>${order++}</td>
-        <td>${s.name}<br><small class="note">${s.area}(移動約${s.walk}分)</small></td>
-        <td>${minutesToTime(s.arrival)}</td>
-        <td><span class="wait-pill ${waitSeverityClass(s.wait)}">${s.wait}分</span></td>
-        <td>${minutesToTime(s.rideEnd)}</td>
-        <td>${tip}</td>
-      </tr>`);
+    items.push(`
+      <div class="itinerary-item">
+        <div class="itinerary-time">
+          <span class="itinerary-time-start">${minutesToTime(s.arrival)}</span>
+          <span class="itinerary-time-arrow">→</span>
+          <span class="itinerary-time-end">${minutesToTime(s.rideEnd)}</span>
+        </div>
+        <div class="itinerary-main">
+          <div class="itinerary-head">
+            <span class="itinerary-order">${order++}</span>
+            <span class="itinerary-name">${s.name}</span>
+            <span class="wait-pill ${waitSeverityClass(s.wait)}">${s.wait}分</span>
+          </div>
+          <div class="itinerary-meta">${s.area}・移動約${s.walk}分</div>
+          <div class="itinerary-tip">${tip}</div>
+        </div>
+      </div>`);
   });
-  document.getElementById("plan-body").innerHTML = rows.join("");
+  document.getElementById("plan-body").innerHTML = items.join("");
 
   const leftoverEl = document.getElementById("leftover");
   if (leftover.length > 0) {
@@ -389,13 +391,14 @@ function renderLogTable() {
   body.innerHTML = logs
     .map((log, i) => {
       const attraction = ATTRACTIONS.find((a) => a.id === log.attractionId);
-      return `<tr>
-          <td>${log.date}</td>
-          <td>${attraction ? attraction.name : log.attractionId}</td>
-          <td>${log.time}</td>
-          <td>${log.actualWait}分</td>
-          <td><button type="button" class="link-btn" data-index="${i}">削除</button></td>
-        </tr>`;
+      return `<div class="log-row">
+          <div class="log-row-main">
+            <span class="log-row-name">${attraction ? attraction.name : log.attractionId}</span>
+            <span class="log-row-meta">${log.date} ${log.time}</span>
+          </div>
+          <span class="wait-pill ${waitSeverityClass(log.actualWait)}">${log.actualWait}分</span>
+          <button type="button" class="link-btn" data-index="${i}">削除</button>
+        </div>`;
     })
     .join("");
 

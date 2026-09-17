@@ -67,19 +67,7 @@
   <section class="card" id="result-section" hidden>
     <h2>2. 提案プラン</h2>
     <div id="summary" class="summary"></div>
-    <table class="plan-table">
-      <thead>
-        <tr>
-          <th>順番</th>
-          <th>アトラクション</th>
-          <th>到着目安</th>
-          <th>予想待ち時間</th>
-          <th>乗車後</th>
-          <th>メモ</th>
-        </tr>
-      </thead>
-      <tbody id="plan-body"></tbody>
-    </table>
+    <div id="plan-body" class="itinerary"></div>
     <div id="leftover" class="leftover" hidden></div>
 
     <h3>時間帯別の混雑予測</h3>
@@ -105,18 +93,9 @@
       </label>
       <button type="submit" class="secondary-btn">記録する</button>
     </form>
-    <table class="plan-table" id="log-table" hidden>
-      <thead>
-        <tr>
-          <th>日付</th>
-          <th>アトラクション</th>
-          <th>時刻</th>
-          <th>実際の待ち時間</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="log-body"></tbody>
-    </table>
+    <div id="log-table" class="log-list" hidden>
+      <div id="log-body"></div>
+    </div>
   </section>
 </main>
 
